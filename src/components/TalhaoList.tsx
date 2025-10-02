@@ -5,7 +5,7 @@ interface TalhaoListProps {
   talhoes: Talhao[];
   onAdd: () => void;
   onRemove: (id: string) => void;
-  onChange: (id: string, field: keyof Talhao, value: any) => void;
+  onChange: (id: string, field: keyof Talhao, value: string | number) => void;
 }
 
 // Função para formatar número com pontos de milhares
@@ -51,7 +51,7 @@ export function TalhaoList({ talhoes, onAdd, onRemove, onChange }: TalhaoListPro
 
       {talhoes.length === 0 && (
         <p className="text-gray-500 text-center py-8">
-          Nenhum talhão adicionado. Clique em "Adicionar Talhão" para começar.
+          Nenhum talhão adicionado. Clique em &quot;Adicionar Talhão&quot; para começar.
         </p>
       )}
 
@@ -61,12 +61,12 @@ export function TalhaoList({ talhoes, onAdd, onRemove, onChange }: TalhaoListPro
           className="bg-gray-50 p-4 rounded-lg border border-gray-200"
         >
           <div className="flex justify-between items-start mb-3">
-            <div className="flex items-center gap-3">
-              <h4 className="font-medium text-gray-700">Talhão {index + 1}</h4>
+            <div className="w-full">
+              <h4 className="font-medium text-gray-700 mb-2">Talhão {index + 1}</h4>
               {(talhao.areaPropria > 0 || talhao.areaArrendada > 0) && (
-                <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
-                  Total: {formatNumberInput((talhao.areaPropria + talhao.areaArrendada).toString())} ha
-                </span>
+                <div className="text-sm font-semibold text-green-600">
+                  Total {(talhao.areaPropria + talhao.areaArrendada).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ha
+                </div>
               )}
             </div>
             <button

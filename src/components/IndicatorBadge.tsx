@@ -33,16 +33,16 @@ export function IndicatorBadge({ status, label, value, tooltip }: IndicatorBadge
   return (
     <div
       className={clsx(
-        'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-medium',
+        'flex items-center justify-between gap-4 px-8 py-5 rounded-lg border-2 font-medium w-full max-w-md',
         config.color
       )}
       title={tooltip}
     >
-      <Icon className={clsx('w-5 h-5', config.iconColor)} />
-      <div className="flex flex-col">
-        <span className="text-xs uppercase tracking-wide">{label}</span>
-        <span className="text-lg font-bold">{value}</span>
+      <div className="flex items-center gap-3">
+        <Icon className={clsx('w-8 h-8 flex-shrink-0', config.iconColor)} />
+        <span className="text-sm font-semibold whitespace-nowrap">{label}</span>
       </div>
+      <span className="text-3xl font-bold whitespace-nowrap ml-auto">{value}</span>
     </div>
   );
 }

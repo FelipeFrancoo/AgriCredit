@@ -119,7 +119,8 @@ export function calcularCustosELucros(
 }
 
 /**
- * Calcula o indicador de custeio (Dívida curto prazo / Receita Bruta)
+ * Calcula o indicador de custeio
+ * Fórmula: Sisbacen menos 1 ano / Receita bruta total
  */
 export function calcularIndicadorCusteio(
   dividaCurtoPrazo: number,
@@ -130,7 +131,8 @@ export function calcularIndicadorCusteio(
 }
 
 /**
- * Calcula o indicador de investimento (Investimento / Lucro Total)
+ * Calcula o indicador de investimento
+ * Fórmula: Previsão de investimento anual / Lucro total
  */
 export function calcularIndicadorInvestimento(
   investimento: number,
@@ -142,18 +144,24 @@ export function calcularIndicadorInvestimento(
 
 /**
  * Determina o parecer baseado no indicador de custeio
+ * Menor que 0,5 - Verde (aprovado)
+ * Entre 0,5 e 0,7 - Amarelo (atenção)
+ * Maior que 0,7 - Reprovado
  */
 export function determinarParecerCusteio(
   indicador: number,
   config: Config = defaultConfig
 ): 'aprovado' | 'atencao' | 'reprovado' {
-  if (indicador <= config.thresholds.custeio.aprovado) return 'aprovado';
+  if (indicador < config.thresholds.custeio.aprovado) return 'aprovado';
   if (indicador <= config.thresholds.custeio.atencao) return 'atencao';
   return 'reprovado';
 }
 
 /**
  * Determina o parecer baseado no indicador de investimento
+ * Menor que 0,5 - Verde (aprovado)
+ * Entre 0,5 e 0,7 - Amarelo (atenção)
+ * Maior que 0,7 - Reprovado
  */
 export function determinarParecerInvestimento(
   indicador: number,
@@ -187,45 +195,92 @@ export function calcularAnaliseCredito(
   dados: FormData,
   config: Config = defaultConfig
 ): Resultados {
-  const producaoTotal = calcularProducaoTotal(dados.propriedade.talhoes, config);
-  const receitaBrutaTotal = calcularReceitaBruta(
-    dados.propriedade.talhoes,
-    dados.custos.precoSoja,
-    dados.custos.precoMilho,
-    config
-  );
+  // Área total de terras plantadas: Area de plantio terra própria + Area de plantio terra arrendada
+  const areaTotalPlantada = dados.propriedade.areaPropria + dados.propriedade.areaArrendada;
   
-  const {
-    custoTotalPropria,
-    custoTotalArrendada,
-    custoTotal,
-    lucroPropria,
-    lucroArrendada,
-    lucroTotal,
-  } = calcularCustosELucros(dados, producaoTotal, receitaBrutaTotal);
+  // Separa talhões por cultura
+  const talhoesMilho = dados.propriedade.talhoes.filter(t => t.cultura === 'milho');
+  const talhoesSoja = dados.propriedade.talhoes.filter(t => t.cultura === 'soja');
   
-  const indicadorCusteio = calcularIndicadorCusteio(
-    dados.dividas.valorMenos1Ano,
-    receitaBrutaTotal
-  );
+  // Calcula áreas por cultura
+  const areaTotalMilho = talhoesMilho.reduce((sum, t) => sum + t.areaPropria + t.areaArrendada, 0);
+  const areaTotalSoja = talhoesSoja.reduce((sum, t) => sum + t.areaPropria + t.areaArrendada, 0);
+  const areaPropiaSoja = talhoesSoja.reduce((sum, t) => sum + t.areaPropria, 0);
+  const areaArrendadaSoja = talhoesSoja.reduce((sum, t) => sum + t.areaArrendada, 0);
   
-  const indicadorInvestimento = calcularIndicadorInvestimento(
-    dados.custos.investimentoTotal,
-    lucroTotal
-  );
+  // Calcula produtividade média por cultura (considerando as regiões)
+  const produtividadeMediaMilho = talhoesMilho.length > 0
+    ? talhoesMilho.reduce((sum, t) => {
+        const area = t.areaPropria + t.areaArrendada;
+        return sum + (calcularRendimento(t.regiao, config) * area);
+      }, 0) / areaTotalMilho
+    : 0;
+  
+  const produtividadeMediaSoja = talhoesSoja.length > 0
+    ? talhoesSoja.reduce((sum, t) => {
+        const area = t.areaPropria + t.areaArrendada;
+        return sum + (calcularRendimento(t.regiao, config) * area);
+      }, 0) / areaTotalSoja
+    : 0;
+  
+  // === MILHO ===
+  // Receita Bruta: Produtividade media da região x Area total de terra plantada x Preco da saca de milho
+  const receitaBrutaMilho = produtividadeMediaMilho * areaTotalMilho * dados.custos.precoMilho;
+  
+  // Previsão de Lucro total milho: Area total de terras plantadas x (Produtividade media região - custo total de insumos) x Preco da saca do milho
+  const previsaoLucroTotalMilho = areaTotalMilho * (produtividadeMediaMilho - dados.custos.custoTotalInsumosMilhoHa) * dados.custos.precoMilho;
+  
+  // === SOJA ===
+  // Previsão Receita Bruta Soja: Area total de terras plantadas x Produtividade media da região x Preco da saca de soja
+  const receitaBrutaSoja = areaTotalSoja * produtividadeMediaSoja * dados.custos.precoSoja;
+  
+  // Previsão lucro terras próprias: Area de plantio de terra própria x (Produtividade media região - Custo total área própria) x Preco saca de soja
+  const previsaoLucroTerrasProprias = areaPropiaSoja * (produtividadeMediaSoja - dados.custos.custoTotalAreaPropriaSoja) * dados.custos.precoSoja;
+  
+  // Previsão lucro terras arrendadas: Area de plantio de terra arrendada x (Produtividade media região - Custo total área arrendada) x Preco saca de soja
+  const previsaoLucroTerrasArrendadas = areaArrendadaSoja * (produtividadeMediaSoja - dados.custos.custoTotalAreaArrendadaSoja) * dados.custos.precoSoja;
+  
+  // Previsão lucro total soja: Previsão lucro terras próprias + Previsão lucro terras arrendadas
+  const previsaoLucroTotalSoja = previsaoLucroTerrasProprias + previsaoLucroTerrasArrendadas;
+  
+  // === TOTAL ===
+  // Receita bruta total: Receita bruta da soja + Receita bruta do milho
+  const receitaBrutaTotal = receitaBrutaSoja + receitaBrutaMilho;
+  
+  // Lucro total: Previsão lucro total soja + Previsão lucro total milho
+  const lucroTotal = previsaoLucroTotalSoja + previsaoLucroTotalMilho;
+  
+  // === DÍVIDAS ===
+  // Previsão de custeio anual = Sisbacen menos 1 ano
+  const previsaoCusteioAnual = dados.dividas.valorMenos1Ano;
+  
+  // Previsão de Investimento anual = Sisbacen mais 1 a 5 anos / 5
+  const previsaoInvestimentoAnual = dados.dividas.valor1a5Anos / 5;
+  
+  // Divida total anual: Previsão de custeio anual + Previsão de investimento anual
+  const dividaTotalAnual = previsaoCusteioAnual + previsaoInvestimentoAnual;
+  
+  // === INDICADORES ===
+  const indicadorCusteio = calcularIndicadorCusteio(previsaoCusteioAnual, receitaBrutaTotal);
+  const indicadorInvestimento = calcularIndicadorInvestimento(previsaoInvestimentoAnual, lucroTotal);
   
   const parecerCusteio = determinarParecerCusteio(indicadorCusteio, config);
   const parecerInvestimento = determinarParecerInvestimento(indicadorInvestimento, config);
   const parecerFinal = determinarParecerFinal(parecerCusteio, parecerInvestimento);
   
   return {
+    areaTotalPlantada,
+    receitaBrutaMilho,
+    previsaoLucroTotalMilho,
+    receitaBrutaSoja,
+    previsaoLucroTerrasProprias,
+    previsaoLucroTerrasArrendadas,
+    previsaoLucroTotalSoja,
     receitaBrutaTotal,
-    lucroPropria,
-    lucroArrendada,
     lucroTotal,
-    custoTotalPropria,
-    custoTotalArrendada,
-    custoTotal,
+    previsaoCusteioAnual,
+    previsaoInvestimentoAnual,
+    dividaTotalAnual,
     indicadorCusteio,
     indicadorInvestimento,
     parecerCusteio,

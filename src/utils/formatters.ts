@@ -46,14 +46,17 @@ export function formatCurrency(value: number): string {
 }
 
 /**
- * Formata percentual
+ * Formata percentual com 2 casas decimais
+ * IMPORTANTE: Não usar style: 'percent' do Intl pois ele multiplica por 100 automaticamente
+ * Exemplo: 0.0066 -> "0,66%" (não 66,00%)
  */
 export function formatPercent(value: number): string {
+  // Multiplica por 100 manualmente e formata com 2 casas decimais
+  const percentValue = value * 100;
   return new Intl.NumberFormat('pt-BR', {
-    style: 'percent',
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  }).format(value);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(percentValue) + '%';
 }
 
 /**
@@ -74,7 +77,7 @@ export function parseFormattedNumber(value: string): number {
  */
 export function formatInputNumber(value: string): string {
   // Remove tudo exceto números, vírgula e ponto
-  let cleaned = value.replace(/[^\d,]/g, '');
+  const cleaned = value.replace(/[^\d,]/g, '').replace(/^0+(?=\d)/, '');
   
   // Separa parte inteira e decimal
   const parts = cleaned.split(',');

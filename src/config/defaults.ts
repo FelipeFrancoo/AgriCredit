@@ -8,12 +8,12 @@ export const defaultConfig: Config = {
   },
   thresholds: {
     custeio: {
-      aprovado: 0.2,    // <= 0.2 aprovado
-      atencao: 0.5,     // 0.2-0.5 atenção, > 0.5 reprovado
+      aprovado: 0.5,    // < 0.5 aprovado (verde)
+      atencao: 0.7,     // 0.5-0.7 atenção (amarelo), > 0.7 reprovado (vermelho)
     },
     investimento: {
-      aprovado: 0.5,    // < 0.5 aprovado
-      atencao: 0.7,     // 0.5-0.7 atenção, > 0.7 reprovado
+      aprovado: 0.5,    // < 0.5 aprovado (verde)
+      atencao: 0.7,     // 0.5-0.7 atenção (amarelo), > 0.7 reprovado (vermelho)
     },
   },
 };

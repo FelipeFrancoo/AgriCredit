@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import { AnaliseCompleta } from '@/types';
 import { getHistory, deleteFromHistory, clearHistory } from '@/utils/storage';
 import { Card } from '@/components/Card';
-import { Trash2, RefreshCw } from '@/components/icons';
+import { Trash2, RefreshCw, Eye } from '@/components/icons';
+import { ResultadosView } from '@/components/ResultadosView';
 import Link from 'next/link';
 
 export default function HistoricoPage() {
   const [historico, setHistorico] = useState<AnaliseCompleta[]>([]);
+  const [selectedAnalise, setSelectedAnalise] = useState<AnaliseCompleta | null>(null);
 
   useEffect(() => {
     loadHistorico();
@@ -31,6 +33,14 @@ export default function HistoricoPage() {
       clearHistory();
       loadHistorico();
     }
+  };
+
+  const handleViewDetails = (analise: AnaliseCompleta) => {
+    setSelectedAnalise(analise);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedAnalise(null);
   };
 
   const formatCurrency = (value: number) => {
@@ -72,7 +82,7 @@ export default function HistoricoPage() {
               <button
                 onClick={handleClearAll}
                 disabled={historico.length === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
               >
                 <Trash2 className="w-4 h-4" />
                 Limpar Tudo
@@ -155,31 +165,67 @@ export default function HistoricoPage() {
                       <div>
                         <span className="text-gray-600">Indicador Custeio:</span>
                         <span className={`ml-2 font-medium ${getStatusColor(analise.resultados.parecerCusteio)}`}>
-                          {(analise.resultados.indicadorCusteio * 100).toFixed(1)}%
+                          {(analise.resultados.indicadorCusteio * 100).toFixed(2)}%
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Indicador Investimento:</span>
                         <span className={`ml-2 font-medium ${getStatusColor(analise.resultados.parecerInvestimento)}`}>
-                          {(analise.resultados.indicadorInvestimento * 100).toFixed(1)}%
+                          {(analise.resultados.indicadorInvestimento * 100).toFixed(2)}%
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleDelete(index)}
-                    className="ml-4 text-red-600 hover:text-red-700 transition-colors"
-                    title="Excluir análise"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex gap-2 ml-4">
+                    <button
+                      onClick={() => handleViewDetails(analise)}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                      title="Ver detalhes completos"
+                    >
+                      <Eye className="w-4 h-4" />
+                      Ver Detalhes
+                    </button>
+                    <button
+                      onClick={() => handleDelete(index)}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      title="Excluir análise"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               </Card>
             ))}
           </div>
         )}
       </main>
+
+      {/* Modal de Detalhes */}
+      {selectedAnalise && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Detalhes da Análise - {new Date(selectedAnalise.dataAnalise).toLocaleString('pt-BR')}
+              </h2>
+              <button
+                onClick={handleCloseDetails}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="p-6">
+              <ResultadosView 
+                analise={selectedAnalise} 
+                onReset={handleCloseDetails}
+                showActions={false}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

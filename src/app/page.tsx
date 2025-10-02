@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { AnaliseCompleta } from '@/types';
 import { AnaliseForm } from '@/components/AnaliseForm';
 import { ResultadosView } from '@/components/ResultadosView';
@@ -28,9 +29,17 @@ export default function Home() {
                 Sistema de Análise de Crédito Agrícola
               </p>
             </div>
-            <div className="text-right text-sm text-gray-600">
-              <p>Versão 1.0</p>
-              <p>{new Date().toLocaleDateString('pt-BR')}</p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/historico"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                📋 Ver Histórico
+              </Link>
+              <div className="text-right text-sm text-gray-600">
+                <p>Versão 1.0</p>
+                <p>{new Date().toLocaleDateString('pt-BR')}</p>
+              </div>
             </div>
           </div>
         </div>

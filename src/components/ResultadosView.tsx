@@ -12,9 +12,10 @@ import Link from 'next/link';
 interface ResultadosViewProps {
   analise: AnaliseCompleta;
   onReset: () => void;
+  showActions?: boolean; // Novo prop para controlar se mostra os botões de ação
 }
 
-export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
+export function ResultadosView({ analise, onReset, showActions = true }: ResultadosViewProps) {
   const { resultados, dados } = analise;
 
   const formatCurrency = (value: number) => {
@@ -33,7 +34,12 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
   };
 
   const formatPercent = (value: number) => {
-    return (value * 100).toFixed(1) + '%';
+    // Multiplica por 100 manualmente e formata com 2 casas decimais
+    const percentValue = value * 100;
+    return new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(percentValue) + '%';
   };
 
   const areaTotal = dados.propriedade.areaPropria + dados.propriedade.areaArrendada;
@@ -51,16 +57,18 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
   return (
     <div className="space-y-6">
       {/* Cabeçalho */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Resultados da Análise</h2>
-        <button
-          onClick={onReset}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Nova Análise
-        </button>
-      </div>
+      {showActions && (
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-800">Resultados da Análise</h2>
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Nova Análise
+          </button>
+        </div>
+      )}
 
       {/* Informações da Propriedade */}
       <Card title="Resumo da Propriedade">
@@ -102,19 +110,21 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
       {/* Parecer Final */}
       <Card>
         <div className="text-center py-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Parecer Final</h3>
-          <IndicatorBadge
-            status={resultados.parecerFinal}
-            label="Status da Análise"
-            value={
-              resultados.parecerFinal === 'aprovado'
-                ? 'APROVADO'
-                : resultados.parecerFinal === 'atencao'
-                ? 'ATENÇÃO'
-                : 'REPROVADO'
-            }
-            tooltip="Parecer final considerando todos os indicadores"
-          />
+          <h3 className="text-xl font-semibold mb-6 text-gray-700">Parecer Final</h3>
+          <div className="flex justify-center">
+            <IndicatorBadge
+              status={resultados.parecerFinal}
+              label="Status da Análise"
+              value={
+                resultados.parecerFinal === 'aprovado'
+                  ? 'APROVADO'
+                  : resultados.parecerFinal === 'atencao'
+                  ? 'ATENÇÃO'
+                  : 'REPROVADO'
+              }
+              tooltip="Parecer final considerando todos os indicadores"
+            />
+          </div>
         </div>
       </Card>
 
@@ -122,7 +132,7 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card title="Indicador de Custeio">
           <div className="space-y-4">
-            <div className="flex justify-center">
+            <div className="flex justify-center py-2">
               <IndicatorBadge
                 status={resultados.parecerCusteio}
                 label="Dívida Curto Prazo / Receita"
@@ -132,8 +142,8 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
             </div>
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <strong>Dívida curto prazo:</strong>{' '}
-                {formatCurrency(analise.dados.dividas.valorMenos1Ano)}
+                <strong>Previsão Custeio Anual:</strong>{' '}
+                {formatCurrency(resultados.previsaoCusteioAnual)}
               </p>
               <p>
                 <strong>Receita bruta:</strong>{' '}
@@ -153,7 +163,7 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
 
         <Card title="Indicador de Investimento">
           <div className="space-y-4">
-            <div className="flex justify-center">
+            <div className="flex justify-center py-2">
               <IndicatorBadge
                 status={resultados.parecerInvestimento}
                 label="Investimento / Lucro Total"
@@ -163,8 +173,8 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
             </div>
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <strong>Investimento:</strong>{' '}
-                {formatCurrency(analise.dados.custos.investimentoTotal)}
+                <strong>Previsão Investimento Anual:</strong>{' '}
+                {formatCurrency(resultados.previsaoInvestimentoAnual)}
               </p>
               <p>
                 <strong>Lucro total:</strong> {formatCurrency(resultados.lucroTotal)}
@@ -188,22 +198,24 @@ export function ResultadosView({ analise, onReset }: ResultadosViewProps) {
       </Card>
 
       {/* Ações */}
-      <div className="flex gap-4 justify-center flex-wrap">
-        <ExportPdfButton analise={analise} />
-        <button
-          onClick={handleSaveToHistory}
-          className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-        >
-          <Save className="w-5 h-5" />
-          Salvar no Histórico
-        </button>
-        <Link
-          href="/historico"
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          Ver Histórico
-        </Link>
-      </div>
+      {showActions && (
+        <div className="flex gap-4 justify-center flex-wrap">
+          <ExportPdfButton analise={analise} />
+          <button
+            onClick={handleSaveToHistory}
+            className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+          >
+            <Save className="w-5 h-5" />
+            Salvar no Histórico
+          </button>
+          <Link
+            href="/historico"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Ver Histórico
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

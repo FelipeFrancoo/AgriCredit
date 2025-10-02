@@ -7,6 +7,13 @@ interface ExportPdfButtonProps {
   analise: AnaliseCompleta;
 }
 
+// Tipo para o documento jsPDF com autoTable
+interface JsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: {
+    finalY: number;
+  };
+}
+
 export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -18,15 +25,16 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
   };
 
   const formatPercent = (value: number) => {
+    // Multiplica por 100 manualmente e formata com 2 casas decimais
+    const percentValue = value * 100;
     return new Intl.NumberFormat('pt-BR', {
-      style: 'percent',
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    }).format(value);
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(percentValue) + '%';
   };
 
   const handleExport = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF() as JsPDFWithAutoTable;
     const { dados, resultados } = analise;
 
     // Título
@@ -53,7 +61,7 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
     });
 
     // Talhões
-    let finalY = (doc as any).lastAutoTable.finalY + 10;
+    let finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(14);
     doc.text('Talhões', 14, finalY);
 
@@ -71,7 +79,7 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
     });
 
     // Custos e Preços
-    finalY = (doc as any).lastAutoTable.finalY + 10;
+    finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(14);
     doc.text('Custos e Preços', 14, finalY);
 
@@ -84,13 +92,13 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
       head: [['Item', 'Valor']],
       body: [
         ['Preço Saca de Soja', formatCurrency(dados.custos.precoSoja)],
-        ['Custo Total Área Própria', formatCurrency(dados.custos.custoTotalAreaPropriaSoja)],
-        ['Custo Total Área Arrendada', formatCurrency(dados.custos.custoTotalAreaArrendadaSoja)],
+        ['Custo Total Área Própria (sc/ha)', `${dados.custos.custoTotalAreaPropriaSoja} sc/ha`],
+        ['Custo Total Área Arrendada (sc/ha)', `${dados.custos.custoTotalAreaArrendadaSoja} sc/ha`],
       ],
     });
 
     // Milho
-    finalY = (doc as any).lastAutoTable.finalY + 8;
+    finalY = doc.lastAutoTable.finalY + 8;
     doc.setFontSize(12);
     doc.text('🌽 Milho', 14, finalY);
 
@@ -99,14 +107,14 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
       head: [['Item', 'Valor']],
       body: [
         ['Preço Saca de Milho', formatCurrency(dados.custos.precoMilho)],
-        ['Custo Total Insumos (sc milho/ha)', formatCurrency(dados.custos.custoTotalInsumosMilhoHa)],
+        ['Custo Total Insumos (sc/ha)', `${dados.custos.custoTotalInsumosMilhoHa} sc/ha`],
         ['Custo Custeio', formatCurrency(dados.custos.custeioPorHa) + '/ha'],
         ['Previsão Custeio Anual', formatCurrency(dados.custos.previsaoCusteioAnual)],
       ],
     });
 
     // Outros Custos
-    finalY = (doc as any).lastAutoTable.finalY + 8;
+    finalY = doc.lastAutoTable.finalY + 8;
     doc.setFontSize(12);
     doc.text('📊 Outros Custos', 14, finalY);
 
@@ -120,7 +128,7 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
     });
 
     // Dívidas
-    finalY = (doc as any).lastAutoTable.finalY + 10;
+    finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(14);
     doc.text('Dívidas SISBACEN', 14, finalY);
 
@@ -147,18 +155,31 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
       startY: 40,
       head: [['Métrica', 'Valor']],
       body: [
+        ['Área Total Plantada', `${resultados.areaTotalPlantada} ha`],
+        ['', ''],
+        ['🌽 MILHO', ''],
+        ['Receita Bruta Milho', formatCurrency(resultados.receitaBrutaMilho)],
+        ['Previsão Lucro Total Milho', formatCurrency(resultados.previsaoLucroTotalMilho)],
+        ['', ''],
+        ['🌱 SOJA', ''],
+        ['Receita Bruta Soja', formatCurrency(resultados.receitaBrutaSoja)],
+        ['Previsão Lucro Terras Próprias', formatCurrency(resultados.previsaoLucroTerrasProprias)],
+        ['Previsão Lucro Terras Arrendadas', formatCurrency(resultados.previsaoLucroTerrasArrendadas)],
+        ['Previsão Lucro Total Soja', formatCurrency(resultados.previsaoLucroTotalSoja)],
+        ['', ''],
+        ['💰 TOTAIS', ''],
         ['Receita Bruta Total', formatCurrency(resultados.receitaBrutaTotal)],
-        ['Custo Total', formatCurrency(resultados.custoTotal)],
-        ['  • Custo Área Própria', formatCurrency(resultados.custoTotalPropria)],
-        ['  • Custo Área Arrendada', formatCurrency(resultados.custoTotalArrendada)],
         ['Lucro Total', formatCurrency(resultados.lucroTotal)],
-        ['  • Lucro Área Própria', formatCurrency(resultados.lucroPropria)],
-        ['  • Lucro Área Arrendada', formatCurrency(resultados.lucroArrendada)],
+        ['', ''],
+        ['📊 DÍVIDAS', ''],
+        ['Previsão Custeio Anual', formatCurrency(resultados.previsaoCusteioAnual)],
+        ['Previsão Investimento Anual', formatCurrency(resultados.previsaoInvestimentoAnual)],
+        ['Dívida Total Anual', formatCurrency(resultados.dividaTotalAnual)],
       ],
     });
 
     // Indicadores
-    finalY = (doc as any).lastAutoTable.finalY + 10;
+    finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(14);
     doc.text('Indicadores de Crédito', 14, finalY);
 
@@ -186,7 +207,7 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
     });
 
     // Parecer Final
-    finalY = (doc as any).lastAutoTable.finalY + 10;
+    finalY = doc.lastAutoTable.finalY + 10;
     doc.setFontSize(16);
     doc.setTextColor(
       resultados.parecerFinal === 'aprovado'

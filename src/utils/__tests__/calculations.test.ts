@@ -13,8 +13,7 @@ import {
   determinarParecerFinal,
   calcularAnaliseCredito,
 } from '../calculations';
-import { FormData, Talhao, Config } from '@/types';
-import { defaultConfig } from '@/config/defaults';
+import { FormData, Talhao } from '@/types';
 
 describe('Calculations Utils', () => {
   describe('calcularRendimento', () => {
@@ -126,6 +125,7 @@ describe('Calculations Utils', () => {
       dividas: {
         valorMenos1Ano: 50000,
         valor1a5Anos: 100000,
+        dividasProtestos: 0,
       },
     };
 
@@ -220,21 +220,21 @@ describe('Calculations Utils', () => {
   });
 
   describe('calcularAnaliseCredito - Integração', () => {
-    it('deve realizar análise completa corretamente', () => {
+    it('deve realizar análise completa corretamente - apenas soja', () => {
       const formData: FormData = {
         propriedade: {
           areaPropria: 100,
-          areaArrendada: 0,
+          areaArrendada: 50,
           talhoes: [
-            { id: '1', areaPropria: 100, areaArrendada: 0, cultura: 'soja', regiao: 'boa' },
+            { id: '1', areaPropria: 100, areaArrendada: 50, cultura: 'soja', regiao: 'boa' },
           ],
         },
         custos: {
           precoSoja: 100,
           precoMilho: 80,
-          custoTotalAreaPropriaSoja: 0,
-          custoTotalAreaArrendadaSoja: 0,
-          custoTotalInsumosMilhoHa: 0,
+          custoTotalAreaPropriaSoja: 30, // custo por ha
+          custoTotalAreaArrendadaSoja: 35, // custo por ha
+          custoTotalInsumosMilhoHa: 25,
           custeioPorHa: 5000,
           previsaoCusteioAnual: 0,
           investimentoTotal: 100000,
@@ -242,32 +242,121 @@ describe('Calculations Utils', () => {
         },
         dividas: {
           valorMenos1Ano: 100000,
-          valor1a5Anos: 50000,
+          valor1a5Anos: 200000,
+          dividasProtestos: 0,
         },
       };
 
       const resultado = calcularAnaliseCredito(formData);
 
-      // Produção: 100 * 70 = 7000 sc
-      // Receita: 7000 * 100 = 700000
-      expect(resultado.receitaBrutaTotal).toBe(700000);
+      // Área total: 100 + 50 = 150 ha
+      expect(resultado.areaTotalPlantada).toBe(150);
 
-      // Custo: 100 * 5000 + 100000 = 600000
-      expect(resultado.custoTotal).toBe(600000);
+      // Produtividade média soja: 70 sc/ha (região boa)
+      // Receita bruta soja: 150 * 70 * 100 = 1,050,000
+      expect(resultado.receitaBrutaSoja).toBe(1050000);
+      expect(resultado.receitaBrutaMilho).toBe(0);
+      expect(resultado.receitaBrutaTotal).toBe(1050000);
 
-      // Lucro: 700000 - 600000 = 100000
-      expect(resultado.lucroTotal).toBe(100000);
+      // Lucro terras próprias: 100 * (70 - 30) * 100 = 400,000
+      expect(resultado.previsaoLucroTerrasProprias).toBe(400000);
 
-      // Indicador custeio: 100000 / 700000 ≈ 0.143
-      expect(resultado.indicadorCusteio).toBeCloseTo(0.143, 2);
+      // Lucro terras arrendadas: 50 * (70 - 35) * 100 = 175,000
+      expect(resultado.previsaoLucroTerrasArrendadas).toBe(175000);
+
+      // Lucro total soja: 400,000 + 175,000 = 575,000
+      expect(resultado.previsaoLucroTotalSoja).toBe(575000);
+      expect(resultado.lucroTotal).toBe(575000);
+
+      // Dívidas
+      expect(resultado.previsaoCusteioAnual).toBe(100000);
+      expect(resultado.previsaoInvestimentoAnual).toBe(40000); // 200000 / 5
+      expect(resultado.dividaTotalAnual).toBe(140000);
+
+      // Indicadores
+      expect(resultado.indicadorCusteio).toBeCloseTo(0.095, 3); // 100000 / 1050000
       expect(resultado.parecerCusteio).toBe('aprovado');
 
-      // Indicador investimento: 100000 / 100000 = 1.0
-      expect(resultado.indicadorInvestimento).toBe(1.0);
-      expect(resultado.parecerInvestimento).toBe('reprovado');
+      expect(resultado.indicadorInvestimento).toBeCloseTo(0.070, 3); // 40000 / 575000
+      expect(resultado.parecerInvestimento).toBe('aprovado');
 
-      // Parecer final
-      expect(resultado.parecerFinal).toBe('reprovado');
+      expect(resultado.parecerFinal).toBe('aprovado');
+    });
+
+    it('deve realizar análise completa corretamente - soja e milho', () => {
+      const formData: FormData = {
+        propriedade: {
+          areaPropria: 100,
+          areaArrendada: 50,
+          talhoes: [
+            { id: '1', areaPropria: 60, areaArrendada: 30, cultura: 'soja', regiao: 'boa' },
+            { id: '2', areaPropria: 40, areaArrendada: 20, cultura: 'milho', regiao: 'medio' },
+          ],
+        },
+        custos: {
+          precoSoja: 100,
+          precoMilho: 60,
+          custoTotalAreaPropriaSoja: 30, // custo por ha
+          custoTotalAreaArrendadaSoja: 35, // custo por ha
+          custoTotalInsumosMilhoHa: 20, // custo por ha
+          custeioPorHa: 5000,
+          previsaoCusteioAnual: 0,
+          investimentoTotal: 100000,
+          arrendamentoPorHa: 0,
+        },
+        dividas: {
+          valorMenos1Ano: 150000,
+          valor1a5Anos: 250000,
+          dividasProtestos: 0,
+        },
+      };
+
+      const resultado = calcularAnaliseCredito(formData);
+
+      // Área total: 100 + 50 = 150 ha
+      expect(resultado.areaTotalPlantada).toBe(150);
+
+      // SOJA
+      // Área soja: 60 + 30 = 90 ha
+      // Produtividade média soja: 70 sc/ha (região boa)
+      // Receita bruta soja: 90 * 70 * 100 = 630,000
+      expect(resultado.receitaBrutaSoja).toBe(630000);
+
+      // Lucro terras próprias soja: 60 * (70 - 30) * 100 = 240,000
+      expect(resultado.previsaoLucroTerrasProprias).toBe(240000);
+
+      // Lucro terras arrendadas soja: 30 * (70 - 35) * 100 = 105,000
+      expect(resultado.previsaoLucroTerrasArrendadas).toBe(105000);
+
+      // Lucro total soja: 240,000 + 105,000 = 345,000
+      expect(resultado.previsaoLucroTotalSoja).toBe(345000);
+
+      // MILHO
+      // Área milho: 40 + 20 = 60 ha
+      // Produtividade média milho: 60 sc/ha (região médio)
+      // Receita bruta milho: 60 * 60 * 60 = 216,000
+      expect(resultado.receitaBrutaMilho).toBe(216000);
+
+      // Lucro total milho: 60 * (60 - 20) * 60 = 144,000
+      expect(resultado.previsaoLucroTotalMilho).toBe(144000);
+
+      // TOTAIS
+      expect(resultado.receitaBrutaTotal).toBe(846000); // 630,000 + 216,000
+      expect(resultado.lucroTotal).toBe(489000); // 345,000 + 144,000
+
+      // Dívidas
+      expect(resultado.previsaoCusteioAnual).toBe(150000);
+      expect(resultado.previsaoInvestimentoAnual).toBe(50000); // 250000 / 5
+      expect(resultado.dividaTotalAnual).toBe(200000);
+
+      // Indicadores
+      expect(resultado.indicadorCusteio).toBeCloseTo(0.177, 3); // 150000 / 846000
+      expect(resultado.parecerCusteio).toBe('aprovado');
+
+      expect(resultado.indicadorInvestimento).toBeCloseTo(0.102, 3); // 50000 / 489000
+      expect(resultado.parecerInvestimento).toBe('aprovado');
+
+      expect(resultado.parecerFinal).toBe('aprovado');
     });
   });
 });

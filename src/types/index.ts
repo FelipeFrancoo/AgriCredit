@@ -33,6 +33,7 @@ export interface CustosPrecos {
 export interface Dividas {
   valorMenos1Ano: number;
   valor1a5Anos: number;
+  dividasProtestos: number;
 }
 
 export interface FormData {
@@ -42,13 +43,29 @@ export interface FormData {
 }
 
 export interface Resultados {
+  // Áreas
+  areaTotalPlantada: number;
+  
+  // MILHO
+  receitaBrutaMilho: number;
+  previsaoLucroTotalMilho: number;
+  
+  // SOJA
+  receitaBrutaSoja: number;
+  previsaoLucroTerrasProprias: number;
+  previsaoLucroTerrasArrendadas: number;
+  previsaoLucroTotalSoja: number;
+  
+  // TOTAIS
   receitaBrutaTotal: number;
-  lucroPropria: number;
-  lucroArrendada: number;
   lucroTotal: number;
-  custoTotalPropria: number;
-  custoTotalArrendada: number;
-  custoTotal: number;
+  
+  // DÍVIDAS
+  previsaoCusteioAnual: number;
+  previsaoInvestimentoAnual: number;
+  dividaTotalAnual: number;
+  
+  // INDICADORES
   indicadorCusteio: number;
   indicadorInvestimento: number;
   parecerCusteio: 'aprovado' | 'atencao' | 'reprovado';

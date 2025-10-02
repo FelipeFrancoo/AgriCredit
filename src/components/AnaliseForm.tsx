@@ -30,6 +30,7 @@ interface FormInputs {
   arrendamentoPorHa: string;
   valorMenos1Ano: string;
   valor1a5Anos: string;
+  dividasProtestos: string;
 }
 
 // Função para formatar número com pontos de milhares
@@ -80,7 +81,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
     setTalhoes(talhoes.filter((t) => t.id !== id));
   };
 
-  const updateTalhao = (id: string, field: keyof Talhao, value: any) => {
+  const updateTalhao = (id: string, field: keyof Talhao, value: string | number) => {
     setTalhoes(
       talhoes.map((t) => (t.id === id ? { ...t, [field]: value } : t))
     );
@@ -130,6 +131,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
         dividas: {
           valorMenos1Ano: parseNumberInput(data.valorMenos1Ano) || 0,
           valor1a5Anos: parseNumberInput(data.valor1a5Anos) || 0,
+          dividasProtestos: parseNumberInput(data.dividasProtestos) || 0,
         },
       };
 
@@ -292,7 +294,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
               <strong>Passo 2 de 3:</strong> Informe os custos de produção e preços.
             </p>
             <p className="text-xs text-blue-700 mt-2">
-              💡 Os valores são formatados automaticamente enquanto você digita (ex: 10000 → 10.000)
+              💡 Os valores monetários são formatados automaticamente em R$ (ex: 10000 → R$ 10.000,00)
             </p>
           </div>
           
@@ -302,7 +304,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preço Saca de Soja (R$/sc) *
+                  Preço Saca de Soja *
                 </label>
                 <Controller
                   name="precoSacaSoja"
@@ -311,13 +313,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                   render={({ field }) => (
                     <input
                       type="text"
-                      value={field.value || ''}
+                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                       onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
+                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                        const formatted = formatNumberInput(withoutPrefix);
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="R$ 0,00"
                     />
                   )}
                 />
@@ -328,7 +331,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custo Total Área Própria (R$) *
+                  Custo Total Área Própria (sc/ha) *
                 </label>
                 <Controller
                   name="custoTotalAreaPropriaSoja"
@@ -343,7 +346,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="0"
                     />
                   )}
                 />
@@ -354,7 +357,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custo Total Área Arrendada (R$) *
+                  Custo Total Área Arrendada (sc/ha) *
                 </label>
                 <Controller
                   name="custoTotalAreaArrendadaSoja"
@@ -369,7 +372,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="0"
                     />
                   )}
                 />
@@ -386,7 +389,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Preço Saca de Milho (R$/sc) *
+                  Preço Saca de Milho *
                 </label>
                 <Controller
                   name="precoSacaMilho"
@@ -395,13 +398,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                   render={({ field }) => (
                     <input
                       type="text"
-                      value={field.value || ''}
+                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                       onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
+                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                        const formatted = formatNumberInput(withoutPrefix);
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="R$ 0,00"
                     />
                   )}
                 />
@@ -412,7 +416,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custo Total Insumos (sc milho/ha) *
+                  Custo Total Insumos (sc/ha) *
                 </label>
                 <Controller
                   name="custoTotalInsumosMilhoHa"
@@ -427,7 +431,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="0"
                     />
                   )}
                 />
@@ -438,7 +442,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custo Custeio (R$/ha) *
+                  Custo Custeio (por hectare) *
                 </label>
                 <Controller
                   name="custeioPorHa"
@@ -447,13 +451,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                   render={({ field }) => (
                     <input
                       type="text"
-                      value={field.value || ''}
+                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                       onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
+                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                        const formatted = formatNumberInput(withoutPrefix);
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="R$ 0,00"
                     />
                   )}
                 />
@@ -464,7 +469,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Previsão Custeio Anual (p/ comparação SISBACEN) *
+                  Previsão Custeio Anual *
                 </label>
                 <Controller
                   name="previsaoCusteioAnual"
@@ -473,73 +478,20 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                   render={({ field }) => (
                     <input
                       type="text"
-                      value={field.value || ''}
+                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                       onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
+                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                        const formatted = formatNumberInput(withoutPrefix);
                         field.onChange(formatted);
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
+                      placeholder="R$ 0,00"
                     />
                   )}
                 />
                 {errors.previsaoCusteioAnual && (
                   <span className="text-red-500 text-sm">Campo obrigatório</span>
                 )}
-              </div>
-            </div>
-          </div>
-
-          {/* OUTROS CUSTOS */}
-          <div className="mb-4 p-4 bg-gray-50 rounded-lg border-l-4 border-gray-500">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">📊 Outros Custos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Investimento Total (R$) *
-                </label>
-                <Controller
-                  name="investimentoTotal"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <input
-                      type="text"
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
-                    />
-                  )}
-                />
-                {errors.investimentoTotal && (
-                  <span className="text-red-500 text-sm">Campo obrigatório</span>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Arrendamento por Hectare (R$/ha)
-                </label>
-                <Controller
-                  name="arrendamentoPorHa"
-                  control={control}
-                  render={({ field }) => (
-                    <input
-                      type="text"
-                      value={field.value || ''}
-                      onChange={(e) => {
-                        const formatted = formatNumberInput(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder=""
-                    />
-                  )}
-                />
               </div>
             </div>
           </div>
@@ -554,14 +506,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
               <strong>Passo 3 de 3:</strong> Informe as dívidas registradas no SISBACEN antes de calcular.
             </p>
             <p className="text-xs text-yellow-700 mt-2">
-              💡 Os valores são formatados automaticamente enquanto você digita (ex: 100000 → 100.000)
+              💡 Os valores monetários são formatados automaticamente em R$ (ex: 100000 → R$ 100.000,00)
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valor com vencimento em menos de 1 ano (R$)
+                Valor com vencimento em menos de 1 ano
               </label>
               <Controller
                 name="valorMenos1Ano"
@@ -569,13 +521,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                 render={({ field }) => (
                   <input
                     type="text"
-                    value={field.value || ''}
+                    value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                     onChange={(e) => {
-                      const formatted = formatNumberInput(e.target.value);
+                      const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                      const formatted = formatNumberInput(withoutPrefix);
                       field.onChange(formatted);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder=""
+                    placeholder="R$ 0,00"
                   />
                 )}
               />
@@ -583,7 +536,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Valor com vencimento de 1 a 5 anos (R$)
+                Valor com vencimento de 1 a 5 anos
               </label>
               <Controller
                 name="valor1a5Anos"
@@ -591,13 +544,37 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                 render={({ field }) => (
                   <input
                     type="text"
-                    value={field.value || ''}
+                    value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
                     onChange={(e) => {
-                      const formatted = formatNumberInput(e.target.value);
+                      const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                      const formatted = formatNumberInput(withoutPrefix);
                       field.onChange(formatted);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder=""
+                    placeholder="R$ 0,00"
+                  />
+                )}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Dívidas de Protestos
+              </label>
+              <Controller
+                name="dividasProtestos"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    type="text"
+                    value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
+                    onChange={(e) => {
+                      const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                      const formatted = formatNumberInput(withoutPrefix);
+                      field.onChange(formatted);
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="R$ 0,00"
                   />
                 )}
               />
@@ -615,7 +592,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
       {/* Navigation Buttons */}
       {step < 4 && (
-        <div className="flex justify-between pt-6 border-t border-gray-200">
+        <div className="flex justify-between pt-6">
           <button
             type="button"
             onClick={prevStep}
