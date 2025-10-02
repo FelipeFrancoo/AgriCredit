@@ -2,9 +2,14 @@ import { Config } from '@/types';
 
 export const defaultConfig: Config = {
   rendimentos: {
-    boa: 70,      // sc/ha
-    medio: 60,    // sc/ha
-    baixa: 50,    // sc/ha
+    boa: 70,      // sc/ha para soja
+    medio: 60,    // sc/ha para soja
+    baixa: 50,    // sc/ha para soja
+  },
+  rendimentosMilho: {
+    boa: 120,     // sc/ha para milho
+    medio: 100,   // sc/ha para milho
+    baixa: 80,    // sc/ha para milho
   },
   thresholds: {
     custeio: {

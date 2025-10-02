@@ -35,6 +35,23 @@ const parseNumberInput = (value: string): number => {
 };
 
 export function TalhaoList({ talhoes, onAdd, onRemove, onChange }: TalhaoListProps) {
+  // Opções de qualidade por cultura
+  const getQualidadeOptions = (cultura: string) => {
+    if (cultura === 'milho') {
+      return [
+        { value: 'boa', label: 'Boa (120 sc/ha)' },
+        { value: 'medio', label: 'Mediana (100 sc/ha)' },
+        { value: 'baixa', label: 'Ruim (80 sc/ha)' },
+      ];
+    }
+    // Soja (padrão)
+    return [
+      { value: 'boa', label: 'Boa (70 sc/ha)' },
+      { value: 'medio', label: 'Médio (60 sc/ha)' },
+      { value: 'baixa', label: 'Baixa (50 sc/ha)' },
+    ];
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -137,9 +154,11 @@ export function TalhaoList({ talhoes, onAdd, onRemove, onChange }: TalhaoListPro
                 onChange={(e) => onChange(talhao.id, 'regiao', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
               >
-                <option value="boa">Boa (70 sc/ha)</option>
-                <option value="medio">Médio (60 sc/ha)</option>
-                <option value="baixa">Baixa (50 sc/ha)</option>
+                {getQualidadeOptions(talhao.cultura).map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

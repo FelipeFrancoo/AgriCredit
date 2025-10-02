@@ -17,8 +17,13 @@ export default function HistoricoPage() {
   }, []);
 
   const loadHistorico = () => {
-    const history = getHistory();
-    setHistorico(history);
+    try {
+      const history = getHistory();
+      setHistorico(history);
+    } catch (error) {
+      console.error('Erro ao carregar histórico:', error);
+      setHistorico([]);
+    }
   };
 
   const handleDelete = (index: number) => {
@@ -115,7 +120,13 @@ export default function HistoricoPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {historico.map((analise, index) => (
+            {historico.map((analise, index) => {
+              // Validação de dados
+              if (!analise || !analise.dados || !analise.resultados) {
+                return null;
+              }
+              
+              return (
               <Card key={index}>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -139,39 +150,39 @@ export default function HistoricoPage() {
                       <div>
                         <span className="text-gray-600">Área Total:</span>
                         <span className="ml-2 font-medium">
-                          {analise.dados.propriedade.areaPropria +
-                            analise.dados.propriedade.areaArrendada}{' '}
+                          {(analise.dados.propriedade?.areaPropria || 0) +
+                            (analise.dados.propriedade?.areaArrendada || 0)}{' '}
                           ha
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Receita Bruta:</span>
                         <span className="ml-2 font-medium">
-                          {formatCurrency(analise.resultados.receitaBrutaTotal)}
+                          {formatCurrency(analise.resultados.receitaBrutaTotal || 0)}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Lucro Total:</span>
                         <span className="ml-2 font-medium">
-                          {formatCurrency(analise.resultados.lucroTotal)}
+                          {formatCurrency(analise.resultados.lucroTotal || 0)}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Talhões:</span>
                         <span className="ml-2 font-medium">
-                          {analise.dados.propriedade.talhoes.length}
+                          {analise.dados.propriedade?.talhoes?.length || 0}
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Indicador Custeio:</span>
                         <span className={`ml-2 font-medium ${getStatusColor(analise.resultados.parecerCusteio)}`}>
-                          {(analise.resultados.indicadorCusteio * 100).toFixed(2)}%
+                          {((analise.resultados.indicadorCusteio || 0) * 100).toFixed(2)}%
                         </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Indicador Investimento:</span>
                         <span className={`ml-2 font-medium ${getStatusColor(analise.resultados.parecerInvestimento)}`}>
-                          {(analise.resultados.indicadorInvestimento * 100).toFixed(2)}%
+                          {((analise.resultados.indicadorInvestimento || 0) * 100).toFixed(2)}%
                         </span>
                       </div>
                     </div>
@@ -196,7 +207,8 @@ export default function HistoricoPage() {
                   </div>
                 </div>
               </Card>
-            ))}
+            );
+            })}
           </div>
         )}
       </main>

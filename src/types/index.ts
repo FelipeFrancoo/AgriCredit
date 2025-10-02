@@ -85,6 +85,11 @@ export interface Config {
     medio: number;
     baixa: number;
   };
+  rendimentosMilho: {
+    boa: number;
+    medio: number;
+    baixa: number;
+  };
   thresholds: {
     custeio: {
       aprovado: number;

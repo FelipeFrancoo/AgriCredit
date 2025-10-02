@@ -2,9 +2,12 @@ import { FormData, Resultados, Config, Talhao, Regiao } from '@/types';
 import { defaultConfig } from '@/config/defaults';
 
 /**
- * Calcula o rendimento esperado baseado na região
+ * Calcula o rendimento esperado baseado na região e cultura
  */
-export function calcularRendimento(regiao: Regiao, config: Config = defaultConfig): number {
+export function calcularRendimento(regiao: Regiao, cultura: string = 'soja', config: Config = defaultConfig): number {
+  if (cultura === 'milho') {
+    return config.rendimentosMilho[regiao];
+  }
   return config.rendimentos[regiao];
 }
 
@@ -20,7 +23,7 @@ export function calcularAreaTotal(areaPropria: number, areaArrendada: number): n
  */
 export function calcularProducaoTotal(talhoes: Talhao[], config: Config = defaultConfig): number {
   return talhoes.reduce((total, talhao) => {
-    const rendimento = calcularRendimento(talhao.regiao, config);
+    const rendimento = calcularRendimento(talhao.regiao, talhao.cultura, config);
     const areaTotal = talhao.areaPropria + talhao.areaArrendada;
     return total + (areaTotal * rendimento);
   }, 0);
@@ -36,7 +39,7 @@ export function calcularReceitaBruta(
   config: Config = defaultConfig
 ): number {
   return talhoes.reduce((total, talhao) => {
-    const rendimento = calcularRendimento(talhao.regiao, config);
+    const rendimento = calcularRendimento(talhao.regiao, talhao.cultura, config);
     const areaTotal = talhao.areaPropria + talhao.areaArrendada;
     const producao = areaTotal * rendimento;
     const preco = talhao.cultura === 'soja' ? precoSoja : precoMilho;
@@ -212,14 +215,14 @@ export function calcularAnaliseCredito(
   const produtividadeMediaMilho = talhoesMilho.length > 0
     ? talhoesMilho.reduce((sum, t) => {
         const area = t.areaPropria + t.areaArrendada;
-        return sum + (calcularRendimento(t.regiao, config) * area);
+        return sum + (calcularRendimento(t.regiao, 'milho', config) * area);
       }, 0) / areaTotalMilho
     : 0;
   
   const produtividadeMediaSoja = talhoesSoja.length > 0
     ? talhoesSoja.reduce((sum, t) => {
         const area = t.areaPropria + t.areaArrendada;
-        return sum + (calcularRendimento(t.regiao, config) * area);
+        return sum + (calcularRendimento(t.regiao, 'soja', config) * area);
       }, 0) / areaTotalSoja
     : 0;
   
