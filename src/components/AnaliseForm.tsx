@@ -21,8 +21,6 @@ interface FormInputs {
   // Milho
   precoSacaMilho: string;
   custoTotalInsumosMilhoHa: string;
-  custeioPorHa: string;
-  previsaoCusteioAnual: string;
   // Outros
   investimentoTotal: string;
   arrendamentoPorHa: string;
@@ -126,8 +124,6 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
           // Milho
           precoMilho: parseNumberInput(data.precoSacaMilho) || 0,
           custoTotalInsumosMilhoHa: parseNumberInput(data.custoTotalInsumosMilhoHa) || 0,
-          custeioPorHa: parseNumberInput(data.custeioPorHa) || 0,
-          previsaoCusteioAnual: parseNumberInput(data.previsaoCusteioAnual) || 0,
           // Outros
           investimentoTotal: parseNumberInput(data.investimentoTotal) || 0,
           arrendamentoPorHa: parseNumberInput(data.arrendamentoPorHa) || 0,
@@ -394,59 +390,6 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Custo Custeio (por hectare) *
-                </label>
-                <Controller
-                  name="custeioPorHa"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <input
-                      type="text"
-                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
-                      onChange={(e) => {
-                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
-                        const formatted = formatNumberInput(withoutPrefix);
-                        field.onChange(formatted);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="R$ 0,00"
-                    />
-                  )}
-                />
-                {errors.custeioPorHa && (
-                  <span className="text-red-500 text-sm">Campo obrigatório</span>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Previsão Custeio Anual *
-                </label>
-                <Controller
-                  name="previsaoCusteioAnual"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <input
-                      type="text"
-                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
-                      onChange={(e) => {
-                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
-                        const formatted = formatNumberInput(withoutPrefix);
-                        field.onChange(formatted);
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      placeholder="R$ 0,00"
-                    />
-                  )}
-                />
-                {errors.previsaoCusteioAnual && (
-                  <span className="text-red-500 text-sm">Campo obrigatório</span>
-                )}
-              </div>
             </div>
           </div>
 

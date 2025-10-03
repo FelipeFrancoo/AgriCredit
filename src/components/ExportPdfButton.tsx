@@ -108,8 +108,6 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
       body: [
         ['Preço Saca de Milho', formatCurrency(dados.custos.precoMilho)],
         ['Custo Total Insumos (sc/ha)', `${dados.custos.custoTotalInsumosMilhoHa} sc/ha`],
-        ['Custo Custeio', formatCurrency(dados.custos.custeioPorHa) + '/ha'],
-        ['Previsão Custeio Anual', formatCurrency(dados.custos.previsaoCusteioAnual)],
       ],
     });
 
@@ -172,7 +170,6 @@ export function ExportPdfButton({ analise }: ExportPdfButtonProps) {
         ['Lucro Total', formatCurrency(resultados.lucroTotal)],
         ['', ''],
         ['📊 DÍVIDAS', ''],
-        ['Previsão Custeio Anual', formatCurrency(resultados.previsaoCusteioAnual)],
         ['Previsão Investimento Anual', formatCurrency(resultados.previsaoInvestimentoAnual)],
         ['Dívida Total Anual', formatCurrency(resultados.dividaTotalAnual)],
       ],

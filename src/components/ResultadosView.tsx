@@ -142,10 +142,6 @@ export function ResultadosView({ analise, onReset, showActions = true }: Resulta
             </div>
             <div className="text-sm text-gray-600 space-y-1">
               <p>
-                <strong>Previsão Custeio Anual:</strong>{' '}
-                {formatCurrency(resultados.previsaoCusteioAnual)}
-              </p>
-              <p>
                 <strong>Receita bruta:</strong>{' '}
                 {formatCurrency(resultados.receitaBrutaTotal)}
               </p>

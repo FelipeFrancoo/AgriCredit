@@ -23,8 +23,6 @@ export interface CustosPrecos {
   // Milho
   precoMilho: number;
   custoTotalInsumosMilhoHa: number;
-  custeioPorHa: number;
-  previsaoCusteioAnual: number;
   // Outros
   investimentoTotal: number;
   arrendamentoPorHa: number;
@@ -63,7 +61,6 @@ export interface Resultados {
   lucroTotal: number;
   
   // DÍVIDAS
-  previsaoCusteioAnual: number;
   previsaoInvestimentoAnual: number;
   dividaTotalAnual: number;
   

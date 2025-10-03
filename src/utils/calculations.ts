@@ -86,7 +86,6 @@ export function calcularCustosELucros(
   const areaTotal = calcularAreaTotal(propriedade.areaPropria, propriedade.areaArrendada);
   
   // Custos
-  const custoCusteio = calcularCustoCusteio(areaTotal, custos.custeioPorHa);
   const custoArrendamento = calcularCustoArrendamento(propriedade.areaArrendada, custos.arrendamentoPorHa);
   
   // Proporção de receita por área
@@ -96,15 +95,12 @@ export function calcularCustosELucros(
   const receitaPropria = receitaBruta * proporcaoAreaPropria;
   const receitaArrendada = receitaBruta * proporcaoAreaArrendada;
   
-  const custoCusteioPropria = custoCusteio * proporcaoAreaPropria;
-  const custoCusteioArrendada = custoCusteio * proporcaoAreaArrendada;
-  
   // Investimento é distribuído proporcionalmente
   const investimentoPropria = custos.investimentoTotal * proporcaoAreaPropria;
   const investimentoArrendada = custos.investimentoTotal * proporcaoAreaArrendada;
   
-  const custoTotalPropria = custoCusteioPropria + investimentoPropria;
-  const custoTotalArrendada = custoCusteioArrendada + investimentoArrendada + custoArrendamento;
+  const custoTotalPropria = investimentoPropria;
+  const custoTotalArrendada = investimentoArrendada + custoArrendamento;
   const custoTotal = custoTotalPropria + custoTotalArrendada;
   
   const lucroPropria = receitaPropria - custoTotalPropria;
@@ -281,7 +277,6 @@ export function calcularAnaliseCredito(
     previsaoLucroTotalSoja,
     receitaBrutaTotal,
     lucroTotal,
-    previsaoCusteioAnual,
     previsaoInvestimentoAnual,
     dividaTotalAnual,
     indicadorCusteio,

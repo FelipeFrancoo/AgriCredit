@@ -116,12 +116,6 @@ export function ResultTable({ resultados }: ResultTableProps) {
             <td colSpan={2} className="px-4 py-2 font-bold text-gray-800">📊 DÍVIDAS</td>
           </tr>
           <tr className="border-b hover:bg-gray-50">
-            <td className="px-4 py-3 text-gray-700 pl-8">Previsão de Custeio Anual</td>
-            <td className="px-4 py-3 text-right text-gray-700">
-              {formatCurrency(resultados.previsaoCusteioAnual)}
-            </td>
-          </tr>
-          <tr className="border-b hover:bg-gray-50">
             <td className="px-4 py-3 text-gray-700 pl-8">Previsão de Investimento Anual</td>
             <td className="px-4 py-3 text-right text-gray-700">
               {formatCurrency(resultados.previsaoInvestimentoAnual)}
