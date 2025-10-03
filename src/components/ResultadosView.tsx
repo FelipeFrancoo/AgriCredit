@@ -152,9 +152,9 @@ export function ResultadosView({ analise, onReset, showActions = true }: Resulta
               <div className="mt-3 p-3 bg-gray-50 rounded">
                 <p className="text-xs">
                   <strong>Critérios:</strong>
-                  <br />• ≤ 20%: Aprovado
-                  <br />• 20-50%: Atenção
-                  <br />• &gt; 50%: Reprovado
+                  <br />• &lt; 50%: Aprovado
+                  <br />• 50-70%: Atenção
+                  <br />• &gt; 70%: Reprovado
                 </p>
               </div>
             </div>

@@ -28,6 +28,8 @@ export interface CustosPrecos {
   // Outros
   investimentoTotal: number;
   arrendamentoPorHa: number;
+  // Outras Receitas
+  outrasReceitas: number;
 }
 
 export interface Dividas {

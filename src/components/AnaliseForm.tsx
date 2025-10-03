@@ -14,8 +14,6 @@ interface AnaliseFormProps {
 }
 
 interface FormInputs {
-  areaPropria: string;
-  areaArrendada: string;
   // Soja
   precoSacaSoja: string;
   custoTotalAreaPropriaSoja: string;
@@ -28,6 +26,8 @@ interface FormInputs {
   // Outros
   investimentoTotal: string;
   arrendamentoPorHa: string;
+  // Outras Receitas
+  outrasReceitas: string;
   valorMenos1Ano: string;
   valor1a5Anos: string;
   dividasProtestos: string;
@@ -108,10 +108,14 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
     }
 
     handleSubmit((data: FormInputs) => {
+      // Calcular áreas totais dos talhões
+      const areaPropria = talhoes.reduce((sum, t) => sum + t.areaPropria, 0);
+      const areaArrendada = talhoes.reduce((sum, t) => sum + t.areaArrendada, 0);
+      
       const formData = {
         propriedade: {
-          areaPropria: parseNumberInput(data.areaPropria) || 0,
-          areaArrendada: parseNumberInput(data.areaArrendada) || 0,
+          areaPropria,
+          areaArrendada,
           talhoes,
         },
         custos: {
@@ -127,6 +131,8 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
           // Outros
           investimentoTotal: parseNumberInput(data.investimentoTotal) || 0,
           arrendamentoPorHa: parseNumberInput(data.arrendamentoPorHa) || 0,
+          // Outras Receitas
+          outrasReceitas: parseNumberInput(data.outrasReceitas) || 0,
         },
         dividas: {
           valorMenos1Ano: parseNumberInput(data.valorMenos1Ano) || 0,
@@ -193,87 +199,35 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
         <Card title="Dados da Propriedade">
           <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
-              <strong>Passo 1 de 3:</strong> Informe os dados da propriedade e adicione os talhões.
+              <strong>Passo 1 de 3:</strong> Adicione os talhões da propriedade.
+            </p>
+            <p className="text-xs text-green-700 mt-2">
+              💡 As áreas totais serão calculadas automaticamente com base nos talhões adicionados.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Área Própria (ha) *
-              </label>
-              <Controller
-                name="areaPropria"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <input
-                    type="text"
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      const formatted = formatNumberInput(e.target.value);
-                      field.onChange(formatted);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder=""
-                  />
-                )}
-              />
-              {errors.areaPropria && (
-                <span className="text-red-500 text-sm">Campo obrigatório</span>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Área Arrendada (ha)
-              </label>
-              <Controller
-                name="areaArrendada"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    type="text"
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      const formatted = formatNumberInput(e.target.value);
-                      field.onChange(formatted);
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                    placeholder=""
-                  />
-                )}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Área Total (ha)
-              </label>
-              <Controller
-                name="areaPropria"
-                control={control}
-                render={({ field: fieldPropria }) => (
-                  <Controller
-                    name="areaArrendada"
-                    control={control}
-                    render={({ field: fieldArrendada }) => {
-                      const areaPropria = parseNumberInput(fieldPropria.value || '0');
-                      const areaArrendada = parseNumberInput(fieldArrendada.value || '0');
-                      const areaTotal = areaPropria + areaArrendada;
-                      return (
-                        <input
-                          type="text"
-                          value={areaTotal > 0 ? formatNumberInput(areaTotal.toString()) : ''}
-                          readOnly
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 font-semibold"
-                          placeholder="0"
-                        />
-                      );
-                    }}
-                  />
-                )}
-              />
+          {/* Resumo das Áreas Calculadas */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">📊 Resumo das Áreas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <p className="text-xs text-blue-700 mb-1">Área Própria Total</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {talhoes.reduce((sum, t) => sum + t.areaPropria, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ha
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-blue-700 mb-1">Área Arrendada Total</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {talhoes.reduce((sum, t) => sum + t.areaArrendada, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ha
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-blue-700 mb-1">Área Total</p>
+                <p className="text-lg font-bold text-blue-900">
+                  {talhoes.reduce((sum, t) => sum + t.areaPropria + t.areaArrendada, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ha
+                </p>
+              </div>
             </div>
           </div>
 
@@ -495,6 +449,38 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
               </div>
             </div>
           </div>
+
+          {/* OUTRAS RECEITAS */}
+          <div className="mb-6 p-4 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+            <h3 className="text-lg font-semibold text-purple-800 mb-4">💰 Outras Receitas</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Valor de Outras Receitas
+                </label>
+                <Controller
+                  name="outrasReceitas"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      value={field.value ? `R$ ${formatNumberInput(field.value)}` : ''}
+                      onChange={(e) => {
+                        const withoutPrefix = e.target.value.replace(/^R\$\s*/, '');
+                        const formatted = formatNumberInput(withoutPrefix);
+                        field.onChange(formatted);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="R$ 0,00"
+                    />
+                  )}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Exemplo: Pecuária, Prestação de Serviços, Venda de Máquinas, etc.
+                </p>
+              </div>
+            </div>
+          </div>
         </Card>
       )}
 
@@ -559,7 +545,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Dívidas de Protestos
+                Dívidas vencidas (Protestos, CPR, Revendas, etc)
               </label>
               <Controller
                 name="dividasProtestos"
