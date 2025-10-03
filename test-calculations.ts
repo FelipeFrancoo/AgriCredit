@@ -36,10 +36,9 @@ const teste1: FormData = {
     custoTotalAreaArrendadaSoja: 0,
     precoMilho: 0,
     custoTotalInsumosMilhoHa: 0,
-    custeioPorHa: 0,
-    previsaoCusteioAnual: 0,
     investimentoTotal: 0,
     arrendamentoPorHa: 0,
+    outrasReceitas: 0,
   },
   dividas: {
     valorMenos1Ano: 50000,
@@ -104,10 +103,9 @@ const teste2: FormData = {
     custoTotalAreaArrendadaSoja: 55.00, // R$ 55/saca (mais caro)
     precoMilho: 0,
     custoTotalInsumosMilhoHa: 0,
-    custeioPorHa: 0,
-    previsaoCusteioAnual: 0,
     investimentoTotal: 0,
     arrendamentoPorHa: 0,
+    outrasReceitas: 0,
   },
   dividas: {
     valorMenos1Ano: 100000,
@@ -185,10 +183,9 @@ const teste3: FormData = {
     custoTotalAreaArrendadaSoja: 55.00,
     precoMilho: 85.00,
     custoTotalInsumosMilhoHa: 40.00,
-    custeioPorHa: 0,
-    previsaoCusteioAnual: 0,
     investimentoTotal: 0,
     arrendamentoPorHa: 0,
+    outrasReceitas: 0,
   },
   dividas: {
     valorMenos1Ano: 150000,
