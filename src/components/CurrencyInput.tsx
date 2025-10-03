@@ -42,22 +42,6 @@ export const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
       return formatted;
     };
 
-    /**
-     * Extrai o valor numérico do input formatado
-     * Exemplo: R$ 1.234,56 -> 1234.56
-     */
-    const extractNumber = (formatted: string): number => {
-      if (!formatted) return 0;
-      
-      // Remove tudo exceto números e vírgula
-      const cleaned = formatted.replace(/[^\d,]/g, '');
-      
-      // Converte vírgula para ponto decimal
-      const normalized = cleaned.replace(',', '.');
-      
-      return parseFloat(normalized) || 0;
-    };
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value;
       

@@ -62,7 +62,7 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
   const [step, setStep] = useState(1);
   const [talhoes, setTalhoes] = useState<Talhao[]>([]);
   
-  const { register, handleSubmit, formState: { errors }, control } = useForm<FormInputs>();
+  const { handleSubmit, formState: { errors }, control } = useForm<FormInputs>();
 
   const addTalhao = () => {
     const newTalhao: Talhao = {

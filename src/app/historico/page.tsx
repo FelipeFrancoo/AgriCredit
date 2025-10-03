@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { AnaliseCompleta } from '@/types';
 import { getHistory, deleteFromHistory, clearHistory } from '@/utils/storage';
 import { Card } from '@/components/Card';
-import { Trash2, RefreshCw, Eye } from '@/components/icons';
+import { Trash2, Eye } from '@/components/icons';
 import { ResultadosView } from '@/components/ResultadosView';
 import Link from 'next/link';
 
