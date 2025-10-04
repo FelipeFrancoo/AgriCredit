@@ -14,6 +14,9 @@ interface AnaliseFormProps {
 }
 
 interface FormInputs {
+  // Proprietário
+  nomeProprietario: string;
+  cpf: string;
   // Soja
   precoSacaSoja: string;
   custoTotalAreaPropriaSoja: string;
@@ -62,7 +65,23 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
   const [step, setStep] = useState(1);
   const [talhoes, setTalhoes] = useState<Talhao[]>([]);
   
-  const { handleSubmit, formState: { errors }, control } = useForm<FormInputs>();
+  const { handleSubmit, formState: { errors }, control } = useForm<FormInputs>({
+    defaultValues: {
+      nomeProprietario: '',
+      cpf: '',
+      precoSacaSoja: '',
+      custoTotalAreaPropriaSoja: '',
+      custoTotalAreaArrendadaSoja: '',
+      precoSacaMilho: '',
+      custoTotalInsumosMilhoHa: '',
+      investimentoTotal: '',
+      arrendamentoPorHa: '',
+      outrasReceitas: '',
+      valorMenos1Ano: '',
+      valor1a5Anos: '',
+      dividasProtestos: '',
+    }
+  });
 
   const addTalhao = () => {
     const newTalhao: Talhao = {
@@ -112,6 +131,8 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
       
       const formData = {
         propriedade: {
+          nomeProprietario: data.nomeProprietario || '',
+          cpf: data.cpf || '',
           areaPropria,
           areaArrendada,
           talhoes,
@@ -193,12 +214,85 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
       {/* Step 1: Dados da Propriedade */}
       {step === 1 && (
         <Card title="Dados da Propriedade">
+          {/* Dados do Proprietário */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+            <h3 className="text-sm font-semibold text-blue-800 mb-4">👤 Dados do Proprietário</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nome Completo *
+                </label>
+                <Controller
+                  name="nomeProprietario"
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      {...field}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="Digite o nome completo"
+                    />
+                  )}
+                />
+                {errors.nomeProprietario && (
+                  <span className="text-red-500 text-sm">Campo obrigatório</span>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CPF *
+                </label>
+                <Controller
+                  name="cpf"
+                  control={control}
+                  rules={{ 
+                    required: true,
+                    pattern: {
+                      value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/,
+                      message: 'CPF inválido'
+                    }
+                  }}
+                  render={({ field }) => (
+                    <input
+                      type="text"
+                      {...field}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 11) {
+                          if (value.length > 9) {
+                            value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                          } else if (value.length > 6) {
+                            value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+                          } else if (value.length > 3) {
+                            value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+                          }
+                          field.onChange(value);
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                    />
+                  )}
+                />
+                {errors.cpf && (
+                  <span className="text-red-500 text-sm">
+                    {errors.cpf.message || 'Campo obrigatório'}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Talhões */}
           <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
-              <strong>Passo 1 de 3:</strong> Adicione os talhões da propriedade.
+              💡 Adicione os talhões da propriedade com suas respectivas áreas e culturas.
             </p>
             <p className="text-xs text-green-700 mt-2">
-              💡 As áreas totais serão calculadas automaticamente com base nos talhões adicionados.
+              As áreas totais serão calculadas automaticamente com base nos talhões adicionados.
             </p>
           </div>
           
@@ -241,10 +335,10 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
         <Card title="Custos e Preços">
           <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
-              <strong>Passo 2 de 3:</strong> Informe os custos de produção e preços.
+              💡 Informe os custos de produção e preços de venda das safras.
             </p>
             <p className="text-xs text-blue-700 mt-2">
-              💡 Os valores monetários são formatados automaticamente em R$ (ex: 10000 → R$ 10.000,00)
+              Os valores monetários são formatados automaticamente em R$ (ex: 10000 → R$ 10.000,00)
             </p>
           </div>
           
@@ -432,10 +526,10 @@ export function AnaliseForm({ onAnaliseComplete }: AnaliseFormProps) {
         <Card title="Dívidas SISBACEN">
           <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800">
-              <strong>Passo 3 de 3:</strong> Informe as dívidas registradas no SISBACEN antes de calcular.
+              💡 Informe as dívidas registradas no SISBACEN para análise de crédito.
             </p>
             <p className="text-xs text-yellow-700 mt-2">
-              💡 Os valores monetários são formatados automaticamente em R$ (ex: 100000 → R$ 100.000,00)
+              Os valores monetários são formatados automaticamente em R$ (ex: 100000 → R$ 100.000,00)
             </p>
           </div>
           

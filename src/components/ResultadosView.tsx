@@ -70,6 +70,22 @@ export function ResultadosView({ analise, onReset, showActions = true }: Resulta
         </div>
       )}
 
+      {/* Dados do Proprietário */}
+      {dados.propriedade.nomeProprietario && (
+        <Card title="Dados do Proprietário">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+              <p className="text-sm text-gray-600 mb-1">Nome Completo</p>
+              <p className="text-lg font-bold text-gray-800">{dados.propriedade.nomeProprietario}</p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+              <p className="text-sm text-gray-600 mb-1">CPF</p>
+              <p className="text-lg font-bold text-gray-800">{dados.propriedade.cpf}</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Informações da Propriedade */}
       <Card title="Resumo da Propriedade">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -10,6 +10,8 @@ export interface Talhao {
 }
 
 export interface DadosPropriedade {
+  nomeProprietario: string;
+  cpf: string;
   areaPropria: number;
   areaArrendada: number;
   talhoes: Talhao[];

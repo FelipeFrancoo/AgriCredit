@@ -146,6 +146,28 @@ export default function HistoricoPage() {
                       </span>
                     </div>
 
+                    {/* Dados do Proprietário */}
+                    {analise.dados.propriedade?.nomeProprietario && (
+                      <div className="mb-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                        <div className="flex flex-wrap gap-4">
+                          <div>
+                            <span className="text-xs text-gray-600">Proprietário:</span>
+                            <span className="ml-2 font-semibold text-gray-800">
+                              {analise.dados.propriedade.nomeProprietario}
+                            </span>
+                          </div>
+                          {analise.dados.propriedade?.cpf && (
+                            <div>
+                              <span className="text-xs text-gray-600">CPF:</span>
+                              <span className="ml-2 font-semibold text-gray-800">
+                                {analise.dados.propriedade.cpf}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-gray-600">Área Total:</span>
