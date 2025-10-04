@@ -6,6 +6,8 @@ import { getHistory, deleteFromHistory, clearHistory } from '@/utils/storage';
 import { Card } from '@/components/Card';
 import { Trash2, Eye } from '@/components/icons';
 import { ResultadosView } from '@/components/ResultadosView';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { Header } from '@/components/Header';
 import Link from 'next/link';
 
 export default function HistoricoPage() {
@@ -71,37 +73,41 @@ export default function HistoricoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-green-700">
-                Histórico de Análises
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                {historico.length} análise(s) salva(s)
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleClearAll}
-                disabled={historico.length === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-              >
-                <Trash2 className="w-4 h-4" />
-                Limpar Tudo
-              </button>
-              <Link
-                href="/"
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Voltar
-              </Link>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+        <Header />
+        
+        {/* Sub Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-green-700">
+                  Histórico de Análises
+                </h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  {historico.length} análise(s) salva(s)
+                </p>
+              </div>
+              <div className="flex gap-4">
+                <button
+                  onClick={handleClearAll}
+                  disabled={historico.length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Limpar Tudo
+                </button>
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Voltar
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {historico.length === 0 ? (
@@ -261,5 +267,6 @@ export default function HistoricoPage() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 }
