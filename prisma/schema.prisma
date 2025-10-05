@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuário
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relacionamento com análises criadas por este usuário
+  analises  AnaliseCredito[]
+  
+  @@map("users")
+}
+
+// Enum para tipos de usuário
+enum Role {
+  ADMIN
+  USER
+}
+
+// Modelo de Análise de Crédito
+model AnaliseCredito {
+  id        String   @id @default(cuid())
+  userId    String
+  
+  // Dados da Propriedade (JSON)
+  nomeProprietario String
+  cpf              String
+  areaPropria      Float
+  areaArrendada    Float
+  talhoes          Json    // Array de talhões
+  
+  // Custos e Preços (JSON)
+  custos           Json    // Objeto com todos os custos
+  
+  // Dívidas (JSON)
+  dividas          Json    // Objeto com as dívidas
+  
+  // Resultados (JSON)
+  resultados       Json    // Objeto com todos os resultados
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relacionamento com o usuário que criou
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("analises_credito")
+  @@index([userId])
+  @@index([cpf])
+  @@index([createdAt])
+}

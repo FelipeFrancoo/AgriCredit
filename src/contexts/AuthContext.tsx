@@ -1,7 +1,13 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, authenticateUser, initializeUsers, isAdmin } from '@/utils/userStorage';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'USER';
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -18,29 +24,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Inicializa usuários padrão
-    initializeUsers();
-    
     // Verifica se há um usuário salvo no localStorage
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      const userData = JSON.parse(savedUser);
-      setUser(userData);
-      setIsAuthenticated(true);
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Erro ao carregar usuário:', error);
+        localStorage.removeItem('currentUser');
+      }
     }
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const authenticatedUser = authenticateUser(email, password);
-    
-    if (authenticatedUser) {
-      setUser(authenticatedUser);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      const userData = await response.json();
+      
+      setUser(userData);
       setIsAuthenticated(true);
-      localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+      
       return true;
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+      return false;
     }
-    
-    return false;
   };
 
   const logout = () => {
@@ -53,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ 
       isAuthenticated, 
       user, 
-      isAdmin: isAdmin(user),
+      isAdmin: user?.role === 'ADMIN',
       login, 
       logout 
     }}>
