@@ -18,13 +18,29 @@ export default function HistoricoPage() {
     loadHistorico();
   }, []);
 
-  const loadHistorico = () => {
+  const loadHistorico = async () => {
     try {
+      // Tenta carregar do banco primeiro
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        const user = JSON.parse(currentUser);
+        
+        const response = await fetch(`/api/analises?userId=${user.id}`);
+        if (response.ok) {
+          const analises = await response.json();
+          setHistorico(analises);
+          return;
+        }
+      }
+
+      // Fallback para localStorage se falhar
       const history = getHistory();
       setHistorico(history);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
-      setHistorico([]);
+      // Fallback para localStorage
+      const history = getHistory();
+      setHistorico(history);
     }
   };
 

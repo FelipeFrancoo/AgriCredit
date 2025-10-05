@@ -44,13 +44,41 @@ export function ResultadosView({ analise, onReset, showActions = true }: Resulta
 
   const areaTotal = dados.propriedade.areaPropria + dados.propriedade.areaArrendada;
 
-  const handleSaveToHistory = () => {
+  const handleSaveToHistory = async () => {
     try {
+      // Pega o usuário atual
+      const currentUser = localStorage.getItem('currentUser');
+      if (!currentUser) {
+        alert('Você precisa estar logado para salvar análises');
+        return;
+      }
+
+      const user = JSON.parse(currentUser);
+
+      // Salva no banco via API
+      const response = await fetch('/api/analises', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          dados: analise.dados,
+          resultados: analise.resultados,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar análise');
+      }
+
+      // Também salva no localStorage como backup
       saveToHistory(analise);
-      alert('Análise salva no histórico com sucesso!');
+
+      alert('Análise salva com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar histórico:', error);
-      alert('Erro ao salvar no histórico.');
+      console.error('Erro ao salvar análise:', error);
+      alert('Erro ao salvar análise. Tente novamente.');
     }
   };
 
