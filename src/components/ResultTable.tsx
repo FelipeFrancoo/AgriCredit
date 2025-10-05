@@ -104,6 +104,12 @@ export function ResultTable({ resultados }: ResultTableProps) {
               {formatCurrency(resultados.receitaBrutaTotal)}
             </td>
           </tr>
+          <tr className="border-b hover:bg-gray-50">
+            <td className="px-4 py-3 text-gray-700 pl-8">Previsão de Lucro de Outras Receitas</td>
+            <td className="px-4 py-3 text-right text-gray-700">
+              {formatCurrency(resultados.previsaoLucroOutrasReceitas)}
+            </td>
+          </tr>
           <tr className="border-b hover:bg-gray-50 bg-green-50">
             <td className="px-4 py-3 text-gray-700 font-semibold">Lucro Total</td>
             <td className="px-4 py-3 text-right font-bold text-green-700">

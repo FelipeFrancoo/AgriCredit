@@ -60,6 +60,7 @@ export interface Resultados {
   
   // TOTAIS
   receitaBrutaTotal: number;
+  previsaoLucroOutrasReceitas: number;
   lucroTotal: number;
   
   // DÍVIDAS

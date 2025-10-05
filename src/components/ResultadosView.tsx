@@ -55,7 +55,7 @@ export function ResultadosView({ analise, onReset, showActions = true }: Resulta
   };
 
   return (
-    <div className="space-y-6">
+    <div id="resultados-view" className="space-y-6">
       {/* Cabeçalho */}
       {showActions && (
         <div className="flex justify-between items-center">

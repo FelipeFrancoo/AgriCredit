@@ -119,14 +119,15 @@ export function calcularCustosELucros(
 
 /**
  * Calcula o indicador de custeio
- * Fórmula: Sisbacen menos 1 ano / Receita bruta total
+ * Fórmula: (Sisbacen menos 1 ano + Dívidas Vencidas) / Previsão de Receita Total
  */
 export function calcularIndicadorCusteio(
   dividaCurtoPrazo: number,
+  dividasVencidas: number,
   receitaBruta: number
 ): number {
   if (receitaBruta === 0) return Infinity;
-  return dividaCurtoPrazo / receitaBruta;
+  return (dividaCurtoPrazo + dividasVencidas) / receitaBruta;
 }
 
 /**
@@ -246,8 +247,11 @@ export function calcularAnaliseCredito(
   // Receita bruta total: Receita bruta da soja + Receita bruta do milho
   const receitaBrutaTotal = receitaBrutaSoja + receitaBrutaMilho;
   
-  // Lucro total: Previsão lucro total soja + Previsão lucro total milho
-  const lucroTotal = previsaoLucroTotalSoja + previsaoLucroTotalMilho;
+  // Previsão de lucro de outros tipos de receitas: Outras receitas x 0.2
+  const previsaoLucroOutrasReceitas = dados.custos.outrasReceitas * 0.2;
+  
+  // Previsão de lucro total: Previsão lucro total soja + Previsão lucro total milho + Previsão de lucro de outros tipos de receitas
+  const lucroTotal = previsaoLucroTotalSoja + previsaoLucroTotalMilho + previsaoLucroOutrasReceitas;
   
   // === DÍVIDAS ===
   // Previsão de custeio anual = Sisbacen menos 1 ano
@@ -260,7 +264,7 @@ export function calcularAnaliseCredito(
   const dividaTotalAnual = previsaoCusteioAnual + previsaoInvestimentoAnual;
   
   // === INDICADORES ===
-  const indicadorCusteio = calcularIndicadorCusteio(previsaoCusteioAnual, receitaBrutaTotal);
+  const indicadorCusteio = calcularIndicadorCusteio(previsaoCusteioAnual, dados.dividas.dividasProtestos, receitaBrutaTotal);
   const indicadorInvestimento = calcularIndicadorInvestimento(previsaoInvestimentoAnual, lucroTotal);
   
   const parecerCusteio = determinarParecerCusteio(indicadorCusteio, config);
@@ -276,6 +280,7 @@ export function calcularAnaliseCredito(
     previsaoLucroTerrasArrendadas,
     previsaoLucroTotalSoja,
     receitaBrutaTotal,
+    previsaoLucroOutrasReceitas,
     lucroTotal,
     previsaoInvestimentoAnual,
     dividaTotalAnual,
