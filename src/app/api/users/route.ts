@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const users = getUsers();
     // Remove senhas da resposta
-    const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+    const usersWithoutPasswords = users.map(({ password: _pwd, ...user }) => user);
     return NextResponse.json(usersWithoutPasswords);
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     const newUser = addUser({ name, email, password, role });
     
     // Remove senha da resposta
-    const { password: _, ...userWithoutPassword } = newUser;
+    const { password: _pwd, ...userWithoutPassword } = newUser;
     
     return NextResponse.json(userWithoutPassword, { status: 201 });
   } catch (error: unknown) {
@@ -56,7 +56,7 @@ export async function PUT(request: Request) {
     const updatedUser = updateUser(id, { name, email, password, role });
     
     // Remove senha da resposta
-    const { password: _, ...userWithoutPassword } = updatedUser;
+    const { password: _pwd2, ...userWithoutPassword } = updatedUser;
     
     return NextResponse.json(userWithoutPassword);
   } catch (error: unknown) {
